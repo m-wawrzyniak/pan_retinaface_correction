@@ -46,3 +46,14 @@ Now, I need to understand what exactly im trying to do with the CNN
 # TODO: 8. Make sure to properly preprocess the dataset e.g. should we discard images which are too similar?
 # TODO: 9. Serialize the face extraction algorithm, so that we can create huge dataset based on all recordings.
 # TODO: 10. Get the external drive with all the recordings data.
+
+"""
+11.09.25
+
+Dataset preparation and image preprocessing.
+
+Serialized the image extraction algorithm, handled by pre00.
+Standardized the image size and introduced padding box by pre01.
+Subsampled the images using threshold time by pre02.
+"""
+# TODO: 11. Create a script which will allow for fast and efficient labeling of each image.
