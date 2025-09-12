@@ -13,10 +13,10 @@ For that I need a dataset which has accurate labels whether a detected objects a
 Then, I should try the simplest CNN model trained on this dataset and see how well it deals with it.
 
 
-TODO: 1. Ask for RetinaFace implementation that they use. -> They simply use Pupil Cloud Face-Mapper: https://cloud.pupil-labs.com/workspaces/76bcd9b6-7049-41d2-8d23-469281a7ab28/recordings
-TODO: 2. Ask whether there is a dataset with manually labeled objects. -> I don't think in the way it should be done, so we will have to construct our own.
-TODO: 3. Ensure that the set of the toys they use is limited - this would help. -> Yup, there is a limited set.
-TODO: 4. Try to adapt to their format, and develop a simple CNN model to find out whether this approach is even valid. -> Format is below.
+1. Ask for RetinaFace implementation that they use. -> They simply use Pupil Cloud Face-Mapper: https://cloud.pupil-labs.com/workspaces/76bcd9b6-7049-41d2-8d23-469281a7ab28/recordings
+2. Ask whether there is a dataset with manually labeled objects. -> I don't think in the way it should be done, so we will have to construct our own.
+3. Ensure that the set of the toys they use is limited - this would help. -> Yup, there is a limited set.
+4. Try to adapt to their format, and develop a simple CNN model to find out whether this approach is even valid. -> Format is below.
 
 """
 
@@ -43,7 +43,7 @@ Now, I need to understand what exactly im trying to do with the CNN
 """
 # TODO: 6. Understand exactly what is the desired outcome of this classification.
 # TODO: 7. Research what approaches are viable, CNN etc.
-# TODO: 8. Make sure to properly preprocess the dataset e.g. should we discard images which are too similar?
+# 8. Make sure to properly preprocess the dataset e.g. should we discard images which are too similar? -> Okay, we deduplicate at pre02.
 # TODO: 9. Serialize the face extraction algorithm, so that we can create huge dataset based on all recordings.
 # TODO: 10. Get the external drive with all the recordings data.
 
@@ -56,4 +56,21 @@ Serialized the image extraction algorithm, handled by pre00.
 Standardized the image size and introduced padding box by pre01.
 Subsampled the images using threshold time by pre02.
 """
-# TODO: 11. Create a script which will allow for fast and efficient labeling of each image.
+# 11. Create a script which will allow for fast and efficient labeling of each image. -> Okay, pre03.
+
+"""
+12.09.25
+
+Dataset balance and labeling.
+Crude CNN model
+
+Simple labeling script at pre03.
+Dataset directory creation at pre04.
+
+Model at EyeTrackerCNN.
+Training of the model at m00.
+Classification at m01.
+"""
+
+# 12. After extraction from all recordings, you have to choose a subset of the recordings which will have their frames labeled. -> Already done at pre01.
+# TODO: 13. Tweak with the model, dataset and choose the correct size of needed labeled dataset.

@@ -1,7 +1,7 @@
 import pandas as pd
 from pathlib import Path
 
-from P01_config import EXTRACTION_DIR
+from P01_config import LABELED_DIR
 from P02_model_parameters import TIME_THRESHOLD_NS
 
 def base_timestamp(fname):
@@ -46,7 +46,7 @@ def deduplicate_folder(folder_path: Path):
 
 
 if __name__ == "__main__":
-    extract_dir = Path(EXTRACTION_DIR)
+    extract_dir = Path(LABELED_DIR)
     for subfolder in extract_dir.iterdir():
         if subfolder.is_dir():
             deduplicate_folder(subfolder)

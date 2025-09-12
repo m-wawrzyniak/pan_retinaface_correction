@@ -10,3 +10,17 @@ MAPPER_SECTIONS = f"{MAPPER_DIR}/sections.csv"
 
 ### EXTRACTION DIR
 EXTRACTION_DIR = "/home/mateusz-wawrzyniak/PycharmProjects/pan_retinaface_correction/extraced_faces"
+
+### LABELING:
+LABELED_DIR = "/home/mateusz-wawrzyniak/PycharmProjects/pan_retinaface_correction/labeled_faces"
+LABELS_CSV = f"{LABELED_DIR}/labels.csv"
+
+### DATASET SPLIT:
+DATASET_DIR = "/home/mateusz-wawrzyniak/PycharmProjects/pan_retinaface_correction/model_dataset"
+
+### MODEL:
+MODEL_PATH = "/home/mateusz-wawrzyniak/PycharmProjects/pan_retinaface_correction/face_classifier.pth"
+CLASSIFICATION_CSV = f"{EXTRACTION_DIR}/classification.csv"
+
+### RESULTS:
+HTML_PATH = "/home/mateusz-wawrzyniak/PycharmProjects/pan_retinaface_correction/classification_visuals"

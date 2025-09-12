@@ -2,13 +2,15 @@ import pandas as pd
 import cv2
 import os
 from collections import defaultdict
+import shutil
+from pathlib import Path
 
 import pre00_rec_path_handling as pre00
 
 from P01_config import MAPPER_CSV
-from P01_config import EXTRACTION_DIR
+from P01_config import EXTRACTION_DIR, LABELED_DIR
 
-from P02_model_parameters import CNN_INPUT_SIZE, IMAGE_PAD_RATIO
+from P02_model_parameters import CNN_INPUT_SIZE, IMAGE_PAD_RATIO, LABELING_REC_IDS
 
 
 ### MISC
@@ -196,5 +198,20 @@ def __main__():
         extract_frames(rec_id=rec_id,
                        rec_dict=rec_dict,
                        mapper_detections=MAPPER_CSV)
+
+    os.makedirs(LABELED_DIR, exist_ok=False)
+    extraction_path = Path(EXTRACTION_DIR)
+    labeled_path = Path(LABELED_DIR)
+
+    for rec_id in LABELING_REC_IDS:
+        src_folder = extraction_path / rec_id
+        dst_folder = labeled_path / rec_id
+
+        if src_folder.exists():
+            shutil.copytree(src_folder, dst_folder)
+            print(f"Copied {rec_id} to labeled folder")
+        else:
+            print(f"Warning: {rec_id} not found in extraction dir")
+
 
 __main__()
