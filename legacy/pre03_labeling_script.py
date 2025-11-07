@@ -3,7 +3,7 @@ import csv
 from pathlib import Path
 
 
-from P01_config import LABELED_DIR, LABELS_CSV
+from config.P01_config import LABELED_DIR, LABELS_CSV
 
 # --- CONFIG ---
 labeled_dir = Path(LABELED_DIR)

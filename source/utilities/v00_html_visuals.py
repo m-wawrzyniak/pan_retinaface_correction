@@ -1,7 +1,7 @@
 import pandas as pd
 from pathlib import Path
 
-from P01_config import EXTRACTION_DIR, CLASSIFICATION_CSV, HTML_PATH
+from config.P01_config import EXTRACTION_DIR, CLASSIFICATION_CSV, HTML_PATH
 
 # --- Paths ---
 extraction_path = Path(EXTRACTION_DIR)

@@ -1,8 +1,8 @@
 import pandas as pd
 from pathlib import Path
 
-from P01_config import LABELED_DIR
-from P02_model_parameters import TIME_THRESHOLD_NS
+from config.P01_config import LABELED_DIR
+from config.P02_model_parameters import TIME_THRESHOLD_NS
 
 def base_timestamp(fname):
     # e.g., 1753444884755327156_2.jpg -> 1753444884755327156

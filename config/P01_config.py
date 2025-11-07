@@ -1,9 +1,10 @@
 ### RECORDINGS;
-REC_DIR = "/home/mateusz-wawrzyniak/PycharmProjects/pan_retinaface_correction/raw_recordings"
-
+DATA_DIR = "/media/mateusz-wawrzyniak/Data"
+REC_DIR = f"{DATA_DIR}/Native Recording Data"
+TIMESTAMP_CSV = f"{DATA_DIR}/Timeseries Data/sections.csv"
 
 ### MAPPER:
-MAPPER_DIR = "/home/mateusz-wawrzyniak/PycharmProjects/pan_retinaface_correction/Sit&Face_FACE-MAPPER_Faces_Manipulative"
+MAPPER_DIR = "/Sit&Face_FACE-MAPPER_Faces_Manipulative"
 
 MAPPER_CSV = f"{MAPPER_DIR}/face_detections.csv"
 MAPPER_SECTIONS = f"{MAPPER_DIR}/sections.csv"
@@ -19,7 +20,7 @@ LABELS_CSV = f"{LABELED_DIR}/labels.csv"
 DATASET_DIR = "/home/mateusz-wawrzyniak/PycharmProjects/pan_retinaface_correction/model_dataset"
 
 ### MODEL:
-MODEL_PATH = "/home/mateusz-wawrzyniak/PycharmProjects/pan_retinaface_correction/face_classifier.pth"
+MODEL_PATH = "/face_classifier.pth"
 CLASSIFICATION_CSV = f"{EXTRACTION_DIR}/classification.csv"
 
 ### RESULTS:

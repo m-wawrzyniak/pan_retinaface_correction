@@ -7,10 +7,10 @@ from pathlib import Path
 
 import pre00_rec_path_handling as pre00
 
-from P01_config import MAPPER_CSV
-from P01_config import EXTRACTION_DIR, LABELED_DIR
+from config.P01_config import MAPPER_CSV, TIMESTAMP_CSV
+from config.P01_config import EXTRACTION_DIR, LABELED_DIR
 
-from P02_model_parameters import CNN_INPUT_SIZE, IMAGE_PAD_RATIO, LABELING_REC_IDS
+from config.P02_model_parameters import CNN_INPUT_SIZE, IMAGE_PAD_RATIO, LABELING_REC_IDS
 
 
 ### MISC
@@ -92,9 +92,11 @@ def _get_section_timestamps(csv_path: str, recording_id: str):
 
     return start_ts, end_ts
 
-def extract_frames(rec_id: str, rec_dict: dict, mapper_detections: str):
+def extract_frames(rec_dict: dict, sections_csv: str, mapper_detections: str):
     # Load and filter CSV
-    df = _load_and_filter_csv(mapper_detections, recording_id=rec_id)
+    df = _load_and_filter_csv(mapper_detections, recording_id=rec_dict['recording_id'])
+
+    print(rec_dict)
 
     # Drop NaN bbox rows just in case
     df = df.dropna(subset=["p1 x [px]", "p1 y [px]", "p2 x [px]", "p2 y [px]"]).reset_index(drop=True)
@@ -114,7 +116,7 @@ def extract_frames(rec_id: str, rec_dict: dict, mapper_detections: str):
     print("🎥 MP4 file opened...")
 
     fps = cap.get(cv2.CAP_PROP_FPS)
-    first_ts, last_ts = _get_section_timestamps(csv_path=rec_dict['sections'], recording_id=rec_id)
+    first_ts, last_ts = _get_section_timestamps(csv_path=sections_csv, recording_id=rec_dict['recording_id'])
 
     counter = defaultdict(int)
     total = len(df)
@@ -194,9 +196,11 @@ def __main__():
     recs_dict = pre00.fetch_rec_paths()
 
     os.makedirs(EXTRACTION_DIR, exist_ok=False)
-    for rec_id, rec_dict in recs_dict.items():
-        extract_frames(rec_id=rec_id,
-                       rec_dict=rec_dict,
+    for rec_name, rec_dict in recs_dict.items():
+        print(rec_name)
+        print(rec_dict)
+        extract_frames(rec_dict=rec_dict,
+                       sections_csv=TIMESTAMP_CSV,
                        mapper_detections=MAPPER_CSV)
 
     os.makedirs(LABELED_DIR, exist_ok=False)

@@ -3,9 +3,9 @@ import shutil
 from pathlib import Path
 from sklearn.model_selection import train_test_split
 
-from P01_config import LABELS_CSV, LABELED_DIR, DATASET_DIR
+from config.P01_config import LABELS_CSV, LABELED_DIR, DATASET_DIR
 
-from P02_model_parameters import SPLIT_RATIOS
+from config.P02_model_parameters import SPLIT_RATIOS
 
 # TODO: Should the dataset be balanced? What else should be done here?
 

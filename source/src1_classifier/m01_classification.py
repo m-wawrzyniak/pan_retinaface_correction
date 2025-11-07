@@ -6,7 +6,7 @@ from pathlib import Path
 
 from EyetrackerCNN import EyetrackerCNN
 
-from P01_config import EXTRACTION_DIR, MODEL_PATH, CLASSIFICATION_CSV
+from config.P01_config import EXTRACTION_DIR, MODEL_PATH, CLASSIFICATION_CSV
 
 
 classification_csv = Path(CLASSIFICATION_CSV)

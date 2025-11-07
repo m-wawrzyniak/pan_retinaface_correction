@@ -1,0 +1,43 @@
+Timeseries Data + Scene
+
+    1.Each directory is <recording_name>-<first segment of recording_id>
+    e.g.
+    \2025-09-03_11-46-37-b3bb1d0c
+
+    2.
+    \sections.csv
+    section id | recording id | recording name | wearer id | wearer name | section start time [ns] | section end time [ns] | start event name | end event name
+    Times are in absolute values of the ET device.
+    All events are recording.begin and recording.end
+
+    \<recording_dir>
+
+        1. *.mp4 - Only one per directory, it's head camera full video.
+        2. events.csv :
+            recording id | timestamp [ns] | name | type
+            Times are absolute.
+            Names have suffixes *.begin\*.end.
+            The names are: recording; manipulative; rattles; books; motionese
+        3. info.json : only useful ones are mentioned
+            gaze_frequency : 200
+            recording_id : <full recording id> e.g. "b3bb1d0c-421c-4f17-83aa-58f4bbfd58de"
+            start_time : int, time at which recording started
+            template_data:
+                recording_name : <full recording name> e.g. "2025-09-03_11:46:37"
+        4. world_timestamps.csv:
+            section id | recording id | timestamp [ns]
+            Times are absolute.
+
+Sit&Face_FACE-MAPPER_Faces_Manipulative
+
+    1. face_detections.csv:
+        section id | recording id | timestamp [ns] | p1 x [px] | p1 y [px] | p2 x [px] | p2 y [px] | eye left x [px] | eye left y [px] | eye right x [px] | eye right y [px] | nose x [px] | nose y [px] | mouth left x [px] | mouth left y [px] | mouth right x [px] | mouth right y [px]
+    2. fixations_on_face.csv:
+        section id | recording id | fixation id | start timestamp [ns] | end timestamp [ns] | fixation on face
+        It has ALL fixation ids. The ones which were on face, have 'fixation on face' = true, otherwise false
+    3. gaze_on_face.csv:
+        section id | recording id | timestamp [ns] | gaze on face
+    4. sections.csv:
+        section id | recording id | recording name | wearer id | wearer name | section start time [ns] | section end time [ns] | start event name | end event name
+        Times are in absolute values of the ET device.
+        All events are manipulative.begin and manipulative.end

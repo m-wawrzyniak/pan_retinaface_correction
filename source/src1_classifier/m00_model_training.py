@@ -1,13 +1,13 @@
 import torch
 import torch.optim as optim
 import torch.nn as nn
-from torchvision import datasets, transforms, models
+from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 import os
 
 from EyetrackerCNN import EyetrackerCNN
 
-from P01_config import DATASET_DIR
+from config.P01_config import DATASET_DIR
 
 # --- GPU setup ---
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

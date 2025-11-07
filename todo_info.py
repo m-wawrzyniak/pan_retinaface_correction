@@ -30,7 +30,7 @@ Now, I need the recordings from the head camera.
 Using face_positions.csv, I should be able to extract the frames containing the classified faces.
 From there I either give someone the task to create sufficient validated dataset, and try some machine learning on it.
 """
-# TODO: 5. Get a complete dataset from single registration and face detection. -> Got from Pupil Cloud Workshop
+# 5. Get a complete dataset from single registration and face detection. -> Got it.
 
 """
 08.09.25
@@ -44,7 +44,7 @@ Now, I need to understand what exactly im trying to do with the CNN
 # TODO: 6. Understand exactly what is the desired outcome of this classification.
 # TODO: 7. Research what approaches are viable, CNN etc.
 # 8. Make sure to properly preprocess the dataset e.g. should we discard images which are too similar? -> Okay, we deduplicate at pre02.
-# TODO: 9. Serialize the face extraction algorithm, so that we can create huge dataset based on all recordings.
+# 9. Serialize the face extraction algorithm, so that we can create huge dataset based on all recordings. -> Yup, pre01 and pre00.
 # TODO: 10. Get the external drive with all the recordings data.
 
 """
@@ -74,3 +74,11 @@ Classification at m01.
 
 # 12. After extraction from all recordings, you have to choose a subset of the recordings which will have their frames labeled. -> Already done at pre01.
 # TODO: 13. Tweak with the model, dataset and choose the correct size of needed labeled dataset.
+
+
+"""
+15.09.25
+
+The recordings I have been provided are wrong. They are not meant to be used.
+I need the ones under Timeseries CSV and Scene Video.
+"""
