@@ -1,8 +1,3 @@
-FACE_MAPPER_DIR = "/home/mateusz-wawrzyniak/Desktop/IP_PAN_Videos/Sit&Face_FACE-MAPPER_Faces_Manipulative/"
-RECORDINGS_INFO_PATH = "/home/mateusz-wawrzyniak/Desktop/IP_PAN_Videos/Timeseries Data + Scene Video/recordings_info.json"
-REC_SUBSET = [
-    "dcd95915-e5b0-4220-99b2-19c883d41d33"
-]
 import os
 import json
 from collections import defaultdict
@@ -10,14 +5,14 @@ from pathlib import Path
 import pandas as pd
 import cv2
 
-# --- Constants ---
-IMAGE_PAD_RATIO = 0.25    # add 25% padding around bbox
-CNN_INPUT_SIZE = 224      # output image size for CNN
+from config import P01_extraction_config as P01
+from config import P02_model_config as P02
 
-
-# ======================================================
-#  Utility function
-# ======================================================
+"""
+Idea:
+on extraction, put the points and boxes so that you can see.
+also what the padding is etc.
+"""
 
 def get_vid_data(csv_path: str):
     """
@@ -62,11 +57,11 @@ def _load_and_filter_csv(mapper_detections: str, recording_id: str):
 def extract_frames(rec_dict: dict, mapper_detections: str):
     """
     Extracts all face frames for one recording and saves them to its extraction_dir.
-    Uses section_start_time_ns and section_end_time_ns from rec_dict.
+    Adds a 'suffix' column in face_frames.csv. Every saved image filename includes the suffix (even 0).
     """
     recording_id = rec_dict["recording_id"]
     video_path = rec_dict["mp4_path"]
-    extract_dir = rec_dict["extraction_dir"]
+    extract_dir = Path(rec_dict["extraction_dir"])
 
     # --- Load detections ---
     df = _load_and_filter_csv(mapper_detections, recording_id)
@@ -77,8 +72,22 @@ def extract_frames(rec_dict: dict, mapper_detections: str):
     df = df.dropna(subset=["p1 x [px]", "p1 y [px]", "p2 x [px]", "p2 y [px]"]).reset_index(drop=True)
     os.makedirs(extract_dir, exist_ok=True)
 
-    # --- Save filtered detections for reference ---
-    csv_out_path = os.path.join(extract_dir, "face_frames.csv")
+    # --- Assign suffixes per timestamp ---
+    df = df.sort_values("timestamp [ns]").reset_index(drop=True)
+    df["suffix"] = 0
+    last_ts = None
+    counter = -1
+    for i, row in df.iterrows():
+        ts = int(row["timestamp [ns]"])
+        if ts != last_ts:
+            counter = 0
+            last_ts = ts
+        else:
+            counter += 1
+        df.at[i, "suffix"] = counter
+
+    # --- Save filtered detections with suffix ---
+    csv_out_path = extract_dir / "face_frames.csv"
     df.to_csv(csv_out_path, index=False)
     print(f"✅ Filtered detections saved at {csv_out_path}")
 
@@ -89,40 +98,26 @@ def extract_frames(rec_dict: dict, mapper_detections: str):
     fps = cap.get(cv2.CAP_PROP_FPS)
     print(f"🎥 Opened video {video_path} | FPS: {fps:.2f}")
 
-    # --- Reference timestamp: start of recording ---
     rec_start_ns = int(rec_dict["start_time"])
     section_start_ns = rec_dict.get("section_start_time_ns")
     section_end_ns = rec_dict.get("section_end_time_ns")
-    if rec_start_ns is None:
-        print(f"⚠️ Missing recording start_time for {recording_id}")
-        return
-
-    # --- Video properties ---
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    if fps <= 0:
-        raise RuntimeError(f"Could not read FPS from video {video_path}")
-    print(f"🎥 Opened video {video_path} | FPS: {fps:.2f}")
-
     frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
-    counter = defaultdict(int)
     total = len(df)
 
     for i, row in df.iterrows():
-        ts = int(row["timestamp [ns]"])  # absolute timestamp (ns)
+        ts = int(row["timestamp [ns]"])
+        suffix = int(row["suffix"])
 
         # --- Compute frame index relative to recording start ---
-        time_offset = (ts - rec_start_ns) / 1e9  # seconds since video start
-
+        time_offset = (ts - rec_start_ns) / 1e9  # seconds
         if time_offset < 0:
-            print(f"⚠️ Detection {ts} occurs before video start ({rec_start_ns}) — skipping")
+            print(f"⚠️ Detection {ts} occurs before video start — skipping")
             continue
 
         frame_idx = int(round(time_offset * fps))
-
-        # --- Bound check ---
         if frame_idx < 0 or frame_idx >= frame_count:
-            print(f"⚠️ Computed frame_idx {frame_idx} outside video frames [0, {frame_count-1}] — skipping")
+            print(f"⚠️ Computed frame_idx {frame_idx} outside video frames — skipping")
             continue
 
         # --- Optional: skip detections outside manipulative section ---
@@ -137,48 +132,39 @@ def extract_frames(rec_dict: dict, mapper_detections: str):
             print(f"⚠️ Could not read frame {frame_idx} (timestamp {ts})")
             continue
 
-        # --- Extract bounding box ---
-        p1x, p1y, p2x, p2y = map(int, [
-            row["p1 x [px]"], row["p1 y [px]"],
-            row["p2 x [px]"], row["p2 y [px]"]
-        ])
-
+        # --- Crop bounding box ---
+        p1x, p1y, p2x, p2y = map(int, [row["p1 x [px]"], row["p1 y [px]"], row["p2 x [px]"], row["p2 y [px]"]])
         height, width = frame.shape[:2]
         w, h = p2x - p1x, p2y - p1y
-        pad = int(max(w, h) * IMAGE_PAD_RATIO)
+        pad = int(max(w, h) * P02.IMAGE_PAD_RATIO)
 
         x1 = max(0, p1x - pad)
         y1 = max(0, p1y - pad)
         x2 = min(width, p2x + pad)
         y2 = min(height, p2y + pad)
-
         if x2 <= x1 or y2 <= y1:
-            print(f"⚠️ Invalid bbox at ts={ts}: ({p1x},{p1y})→({p2x},{p2y})")
+            print(f"⚠️ Invalid bbox at ts={ts}")
             continue
 
         cropped = frame[y1:y2, x1:x2]
 
-        # --- Resize proportionally to CNN_INPUT_SIZE ---
+        # --- Resize proportionally ---
         ch, cw = cropped.shape[:2]
-        scale = CNN_INPUT_SIZE / max(ch, cw)
+        scale = P02.CNN_INPUT_SIZE / max(ch, cw)
         new_w, new_h = int(cw * scale), int(ch * scale)
         resized = cv2.resize(cropped, (new_w, new_h), interpolation=cv2.INTER_LINEAR)
 
         # --- Pad to square ---
-        top = (CNN_INPUT_SIZE - new_h) // 2
-        bottom = CNN_INPUT_SIZE - new_h - top
-        left = (CNN_INPUT_SIZE - new_w) // 2
-        right = CNN_INPUT_SIZE - new_w - left
-        squared = cv2.copyMakeBorder(
-            resized, top, bottom, left, right,
-            borderType=cv2.BORDER_CONSTANT, value=[0, 0, 0]
-        )
+        top = (P02.CNN_INPUT_SIZE - new_h) // 2
+        bottom = P02.CNN_INPUT_SIZE - new_h - top
+        left = (P02.CNN_INPUT_SIZE - new_w) // 2
+        right = P02.CNN_INPUT_SIZE - new_w - left
+        squared = cv2.copyMakeBorder(resized, top, bottom, left, right,
+                                     borderType=cv2.BORDER_CONSTANT, value=[0, 0, 0])
 
-        # --- Save frame ---
-        counter[ts] += 1
-        suffix = f"_{counter[ts]}" if counter[ts] > 1 else ""
-        filename = os.path.join(extract_dir, f"{ts}{suffix}.jpg")
-        cv2.imwrite(filename, squared)
+        # --- Save frame with suffix ---
+        filename = extract_dir / f"{ts}_{suffix}.jpg"
+        cv2.imwrite(str(filename), squared)
 
         if (i + 1) % 150 == 0 or (i + 1) == total:
             percent = (i + 1) / total * 100
@@ -186,6 +172,7 @@ def extract_frames(rec_dict: dict, mapper_detections: str):
 
     cap.release()
     print(f"✅ Done extracting {total} faces for {recording_id}")
+
 
 
 # ======================================================
@@ -227,4 +214,4 @@ def extract_faces_for_all(FACE_MAPPER_DIR: str, recordings_info_path: str, subse
 
 
 if __name__ == "__main__":
-    extract_faces_for_all(FACE_MAPPER_DIR, RECORDINGS_INFO_PATH, subset_ids=REC_SUBSET)
+    extract_faces_for_all(P01.FACE_MAPPER_DIR, P01.RECORDINGS_INFO_PATH, subset_ids=P01.REC_SUBSET)

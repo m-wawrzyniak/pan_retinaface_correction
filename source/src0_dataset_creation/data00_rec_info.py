@@ -3,8 +3,9 @@ import json
 import pandas as pd
 from pathlib import Path
 
+from config import P01_extraction_config as P01
 
-def build_recordings_info(timeseries_data_dir: str, sections_csv_path: str):
+def build_recordings_info(timeseries_data_dir: str, sections_csv_path: str, section_name:str):
     """
     Builds a dictionary with metadata and file paths for each recording in the given directory.
     Creates an 'extracted_frames' folder inside each recording directory.
@@ -26,7 +27,7 @@ def build_recordings_info(timeseries_data_dir: str, sections_csv_path: str):
 
     # --- Load and filter sections.csv ---
     sections_df = pd.read_csv(sections_csv_path)
-    manipulative_sections = sections_df[sections_df["start event name"] == "manipulative.begin"]
+    manipulative_sections = sections_df[sections_df["start event name"] == section_name]
 
     for recording_dir in timeseries_data_dir.iterdir():
         if not recording_dir.is_dir():
@@ -78,6 +79,7 @@ def build_recordings_info(timeseries_data_dir: str, sections_csv_path: str):
         recordings_info[recording_id] = {
             "rec_name": recording_name,
             "start_time": start_time,
+            "recording_root": str(recording_dir),
             "mp4_path": str(mp4_files[0]),
             "timestamps_path": str(timestamps_path),
             "extraction_dir": str(extraction_dir),
@@ -94,9 +96,5 @@ def build_recordings_info(timeseries_data_dir: str, sections_csv_path: str):
     return recordings_info
 
 
-# Example usage:
 if __name__ == "__main__":
-    TIMESERIES_DATA = "/home/mateusz-wawrzyniak/Desktop/IP_PAN_Videos/Timeseries Data + Scene Video/"
-    SECTIONS_CSV = "/home/mateusz-wawrzyniak/Desktop/IP_PAN_Videos/Sit&Face_FACE-MAPPER_Faces_Manipulative/sections.csv"
-
-    build_recordings_info(TIMESERIES_DATA, SECTIONS_CSV)
+    build_recordings_info(P01.TIMESERIES_DATA, P01.SECTIONS_CSV, section_name="manipulative.begin")
