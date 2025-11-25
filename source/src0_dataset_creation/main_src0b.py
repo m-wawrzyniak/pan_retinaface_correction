@@ -19,11 +19,6 @@ if __name__ == "__main__":
     for rec, rec_dict in recordings_info.items():
         if rec_dict["section_start_time_ns"] != None:
             v00.export_html_paginated(
+                name='manual',
                 csv_path= Path(rec_dict['extraction_dir']) / 'manual_class.csv'
             )
-            """
-            v00.present_html_class(
-                csv_path= Path(rec_dict['extraction_dir']) / 'manual_class.csv',
-                html_file_name= 'manual_plot.html'
-            )
-            """

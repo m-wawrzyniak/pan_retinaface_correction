@@ -1,112 +1,16 @@
 import time
-import random
 from pathlib import Path
-
-import numpy as np
 import pandas as pd
-from PIL import Image
-
 import torch
 import torch.nn as nn
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader
 from torchvision import transforms
 
-# -------------------------
-# Put your model class here
-# -------------------------
-# Copy the FaceVerifierCNN class you provided earlier here.
-# For brevity, I'm reusing the same name — paste your model exactly.
-class FaceVerifierCNN(nn.Module):
-    def __init__(self, input_size=64):
-        super(FaceVerifierCNN, self).__init__()
-        self.conv1 = nn.Conv2d(3, 32, kernel_size=3, padding=1)
-        self.bn1 = nn.BatchNorm2d(32)
-        self.pool1 = nn.MaxPool2d(2, 2)
-        self.drop1 = nn.Dropout2d(p=0.1)
-        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
-        self.bn2 = nn.BatchNorm2d(64)
-        self.pool2 = nn.MaxPool2d(2, 2)
-        self.drop2 = nn.Dropout2d(p=0.15)
-        self.conv3 = nn.Conv2d(64, 128, kernel_size=3, padding=1)
-        self.bn3 = nn.BatchNorm2d(128)
-        self.pool3 = nn.MaxPool2d(2, 2)
-        self.drop3 = nn.Dropout2d(p=0.2)
-        self.conv4 = nn.Conv2d(128, 256, kernel_size=3, padding=1)
-        self.bn4 = nn.BatchNorm2d(256)
-        self.pool4 = nn.MaxPool2d(2, 2)
-        self.drop4 = nn.Dropout2d(p=0.2)
+from source.src0_dataset_creation.ImageDataset import CSVImageDataset
+from source.src1_classifier.Classifier import FaceVerifierCNN
+from source.src1_classifier import class00_utilities as class00
 
-        final_dim = input_size // 16
-        self.flatten_size = 256 * final_dim * final_dim
 
-        self.fc1 = nn.Linear(self.flatten_size, 512)
-        self.fc_bn = nn.BatchNorm1d(512)
-        self.fc_drop = nn.Dropout(p=0.5)
-        self.fc2 = nn.Linear(512, 1)
-
-    def forward(self, x):
-        x = self.pool1(torch.relu(self.bn1(self.conv1(x))))
-        x = self.drop1(x)
-        x = self.pool2(torch.relu(self.bn2(self.conv2(x))))
-        x = self.drop2(x)
-        x = self.pool3(torch.relu(self.bn3(self.conv3(x))))
-        x = self.drop3(x)
-        x = self.pool4(torch.relu(self.bn4(self.conv4(x))))
-        x = self.drop4(x)
-        x = x.view(-1, self.flatten_size)
-        x = torch.relu(self.fc_bn(self.fc1(x)))
-        x = self.fc_drop(x)
-        x = self.fc2(x)
-        return x  # logits
-
-# -------------------------
-# Dataset that reads CSV with columns: path,is_face
-# -------------------------
-class CSVImageDataset(Dataset):
-    def __init__(self, df, transform=None):
-        """
-        df: pandas DataFrame with columns ['path', 'is_face']
-        transform: torchvision transform applied to PIL image
-        """
-        self.df = df.reset_index(drop=True)
-        self.transform = transform
-
-    def __len__(self):
-        return len(self.df)
-
-    def __getitem__(self, idx):
-        row = self.df.iloc[idx]
-        img_path = Path(row["path"])
-        # load with PIL
-        img = Image.open(img_path).convert("RGB")
-        if self.transform:
-            img = self.transform(img)
-        label = float(row["is_face"])
-        return img, torch.tensor(label, dtype=torch.float32)
-
-# -------------------------
-# Utility functions
-# -------------------------
-def set_seed(seed=42):
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
-
-def compute_confusion(y_true, y_pred_logits, threshold=0.5):
-    """y_true: tensor or array of 0/1, y_pred_logits: logits -> apply sigmoid"""
-    probs = torch.sigmoid(torch.tensor(y_pred_logits))
-    preds = (probs >= threshold).int()
-    y_true = torch.tensor(y_true).int()
-    TP = int(((preds == 1) & (y_true == 1)).sum())
-    TN = int(((preds == 0) & (y_true == 0)).sum())
-    FP = int(((preds == 1) & (y_true == 0)).sum())
-    FN = int(((preds == 0) & (y_true == 1)).sum())
-    return {"TP": TP, "TN": TN, "FP": FP, "FN": FN}
-
-# -------------------------
-# Training / Evaluation loops
-# -------------------------
 def train_epoch(model, loader, criterion, optimizer, device, scaler=None):
     model.train()
     running_loss = 0.0
@@ -159,9 +63,6 @@ def eval_epoch(model, loader, criterion, device):
     all_labels = torch.cat(all_labels).squeeze().numpy()
     return epoch_loss, all_labels, all_logits
 
-# -------------------------
-# Main training function
-# -------------------------
 def train_model(
     train_csv,
     val_csv,
@@ -174,10 +75,9 @@ def train_model(
     weight_decay=1e-4,
     num_workers=4,
     seed=42,
-    use_amp=True,
-    save_every=1
+    use_amp=True
 ):
-    set_seed(seed)
+    class00.set_seed(seed)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print("Using device:", device)
 
@@ -234,8 +134,8 @@ def train_model(
         scheduler.step(val_loss)
 
         # metrics
-        train_conf = compute_confusion(train_y, train_logits)
-        val_conf = compute_confusion(val_y, val_logits)
+        train_conf = class00.compute_confusion(train_y, train_logits)
+        val_conf = class00.compute_confusion(val_y, val_logits)
         train_acc = (train_conf["TP"] + train_conf["TN"]) / max(1, len(train_ds))
         val_acc = (val_conf["TP"] + val_conf["TN"]) / max(1, len(val_ds))
 
@@ -270,16 +170,6 @@ def train_model(
             }, best_path)
             print("  🔖 Saved best model:", best_path)
 
-        # periodic checkpoint
-        if epoch % save_every == 0:
-            ckpt_path = out_dir / f"ckpt_epoch{epoch}.pth"
-            torch.save({
-                "model_state_dict": model.state_dict(),
-                "optimizer_state_dict": optimizer.state_dict(),
-                "epoch": epoch,
-                "val_loss": val_loss
-            }, ckpt_path)
-
     # save history CSV
     hist_df = pd.DataFrame(history)
     hist_df.to_csv(out_dir / "training_log.csv", index=False)
@@ -287,7 +177,7 @@ def train_model(
 
     # final evaluation on test set
     test_loss, test_y, test_logits = eval_epoch(model, test_loader, criterion, device)
-    test_conf = compute_confusion(test_y, test_logits)
+    test_conf = class00.compute_confusion(test_y, test_logits)
     test_acc = (test_conf["TP"] + test_conf["TN"]) / max(1, len(test_ds))
     print("Test loss:", test_loss)
     print("Test conf:", test_conf)

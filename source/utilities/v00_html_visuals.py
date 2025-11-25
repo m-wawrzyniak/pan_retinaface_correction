@@ -3,69 +3,7 @@ import pandas as pd
 from pathlib import Path
 import math
 
-def present_html_class(csv_path, html_file_name):
-    """
-    Create an HTML visualization of manually classified frames.
-    The HTML shows two sections: face and non-face.
-    The JPGs must be in the same directory as the CSV.
-
-    Parameters
-    ----------
-    csv_path : str or Path
-        Path to manual_class.csv
-    """
-
-    csv_path = Path(csv_path)
-    base_dir = csv_path.parent
-    title = base_dir.parent.name  # directory name becomes title
-
-    df = pd.read_csv(csv_path)
-
-    # Separate into two groups
-    face_df = df[df["is_face"] == 1]
-    nonface_df = df[df["is_face"] == 0]
-
-    html_path = base_dir / html_file_name
-
-    def block_for(df_subset, label):
-        """Return HTML block with embedded images."""
-        html = f"<h2>{label}</h2>\n<div style='display:flex; flex-wrap:wrap;'>\n"
-        for fname in df_subset["frame"]:
-            img_path = base_dir / fname
-            if not img_path.exists():
-                continue
-            html += (
-                f"<div style='margin:10px;'>"
-                f"<img src='{fname}' style='max-width:320px; height:auto; display:block;'>"
-                f"<p style='text-align:center;'>{fname}</p>"
-                f"</div>"
-            )
-        html += "</div>\n"
-        return html
-
-    # Build full HTML
-    html = f"""
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>{title} — Manual Classification</title>
-</head>
-<body style="font-family: sans-serif;">
-    <h1>Manual Classification Results for: {title}</h1>
-
-    {block_for(face_df, "Faces")}
-    <hr>
-    {block_for(nonface_df, "Non-Faces")}
-
-</body>
-</html>
-"""
-
-    html_path.write_text(html, encoding="utf-8")
-    print(f"✅ HTML visualization created at: {html_path}")
-
-def export_html_paginated(csv_path, page_size=100):
+def export_html_paginated(name, csv_path, page_size=100):
     """
     Creates paginated HTML visualization for is_face / non_face images.
 
@@ -87,7 +25,7 @@ def export_html_paginated(csv_path, page_size=100):
 
     def write_page(df_subset, label, page_idx, total_pages):
         """Write a single paginated HTML file."""
-        file_name = f"{label.lower()}_page_{page_idx+1}.html"
+        file_name = f"{name}_{label.lower()}_page_{page_idx+1}.html"
         out_path = base_dir / file_name
 
         start = page_idx * page_size
@@ -95,12 +33,14 @@ def export_html_paginated(csv_path, page_size=100):
         subset = df_subset.iloc[start:end]
 
         # Navigation links
-        nav = "<div>"
+        nav = "<div style='margin-bottom:10px;'>"
         if page_idx > 0:
-            nav += f"<a href='{label.lower()}_page_{page_idx}.html'>⬅️ Prev</a> | "
-        nav += f"Page {page_idx+1} / {total_pages}"
+            prev_page = f"{name}_{label.lower()}_page_{page_idx}.html"
+            nav += f"<a href='{prev_page}'>⬅️ Prev</a> | "
+        nav += f"Page {page_idx + 1} / {total_pages}"
         if page_idx < total_pages - 1:
-            nav += f" | <a href='{label.lower()}_page_{page_idx+2}.html'>Next ➡️</a>"
+            next_page = f"{name}_{label.lower()}_page_{page_idx + 2}.html"
+            nav += f" | <a href='{next_page}'>Next ➡️</a>"
         nav += "</div><hr>"
 
         html = f"""
@@ -143,7 +83,7 @@ def export_html_paginated(csv_path, page_size=100):
             write_page(df_subset, label, page_idx, total_pages)
 
         return [
-            f"{label.lower()}_page_{i+1}.html"
+            f"{name}_{label.lower()}_page_{i + 1}.html"
             for i in range(total_pages)
         ]
 
@@ -152,7 +92,7 @@ def export_html_paginated(csv_path, page_size=100):
     nonface_pages = paginated_export(nonface_df, "NonFaces")
 
     # Create index.html as a hub
-    index_path = base_dir / "index.html"
+    index_path = base_dir / f"{name}_index.html"
     html_index = f"""
 <!DOCTYPE html>
 <html>
