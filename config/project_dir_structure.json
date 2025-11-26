@@ -1,0 +1,17 @@
+{
+  "config": {
+    "_dir": "config",
+    "project_dir_structure.json": "config/project_dir_structure.json",
+    "dataset_dir_structure.json": "config/dataset_dir_structure.json",
+    "classifier_dir_structure.json": "config/classifier_dir_structure.json"
+  },
+  "data": {
+    "_dir": "data",
+    "classifiers": {
+      "_dir": "data/classifiers"
+    },
+    "datasets": {
+      "_dir": "data/datasets"
+    }
+  }
+}

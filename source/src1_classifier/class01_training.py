@@ -10,6 +10,8 @@ from source.src0_dataset_creation.ImageDataset import CSVImageDataset
 from source.src1_classifier.Classifier import FaceVerifierCNN
 from source.src1_classifier import class00_utilities as class00
 
+from config import P02_model_config as P02
+
 
 def train_epoch(model, loader, criterion, optimizer, device, scaler=None):
     model.train()
@@ -64,19 +66,22 @@ def eval_epoch(model, loader, criterion, device):
     return epoch_loss, all_labels, all_logits
 
 def train_model(
-    train_csv,
-    val_csv,
-    test_csv,
-    output_dir="output_model",
-    input_size=64,
-    batch_size=64,
-    epochs=20,
-    lr=1e-3,
-    weight_decay=1e-4,
-    num_workers=4,
-    seed=42,
-    use_amp=True
-):
+        train_csv,
+        val_csv,
+        test_csv,
+        input_size,
+        batch_size,
+        num_workers,
+        lr,
+        weight_decay,
+        reduction_factor,
+        patience,
+        epochs,
+        dec_threshold,
+        seed,
+        output_dir="output_model",
+        use_amp=True
+    ):
     class00.set_seed(seed)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print("Using device:", device)
@@ -85,6 +90,13 @@ def train_model(
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # Transforms
+    '''
+    Introduces heterogeneity in the training set.
+    Resize just ensures proper format.
+    RandomHorizontalFlip flips like mirror half the images.
+    ColorJitter changes the colors a bit.
+    Normalize is some normalization used by standard models.
+    '''
     transform_train = transforms.Compose([
         transforms.Resize((input_size, input_size)),
         transforms.RandomHorizontalFlip(p=0.5),
@@ -92,6 +104,9 @@ def train_model(
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485,0.456,0.406], std=[0.229,0.224,0.225])
     ])
+    '''
+    We don't introduce heterogeneity in the evaluation set.
+    '''
     transform_eval = transforms.Compose([
         transforms.Resize((input_size, input_size)),
         transforms.ToTensor(),
@@ -118,7 +133,7 @@ def train_model(
     model = FaceVerifierCNN(input_size=input_size).to(device)
     criterion = nn.BCEWithLogitsLoss()
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min", factor=0.5, patience=3, verbose=True)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min", factor=reduction_factor, patience=patience, verbose=True)
 
     scaler = torch.cuda.amp.GradScaler() if (use_amp and device.type == "cuda") else None
 
@@ -134,8 +149,8 @@ def train_model(
         scheduler.step(val_loss)
 
         # metrics
-        train_conf = class00.compute_confusion(train_y, train_logits)
-        val_conf = class00.compute_confusion(val_y, val_logits)
+        train_conf = class00.compute_confusion(train_y, train_logits, threshold=dec_threshold)
+        val_conf = class00.compute_confusion(val_y, val_logits, threshold=dec_threshold)
         train_acc = (train_conf["TP"] + train_conf["TN"]) / max(1, len(train_ds))
         val_acc = (val_conf["TP"] + val_conf["TN"]) / max(1, len(val_ds))
 
@@ -177,7 +192,7 @@ def train_model(
 
     # final evaluation on test set
     test_loss, test_y, test_logits = eval_epoch(model, test_loader, criterion, device)
-    test_conf = class00.compute_confusion(test_y, test_logits)
+    test_conf = class00.compute_confusion(test_y, test_logits, threshold=dec_threshold)
     test_acc = (test_conf["TP"] + test_conf["TN"]) / max(1, len(test_ds))
     print("Test loss:", test_loss)
     print("Test conf:", test_conf)
@@ -195,11 +210,8 @@ def train_model(
 
     return model, hist_df, test_conf
 
-# -------------------------
-# Example usage (modify paths)
-# -------------------------
+
 if __name__ == "__main__":
-    # paths to CSVs produced by split_dataset_with_ratios()
     dataset_root = "/home/mateusz-wawrzyniak/PycharmProjects/pan_retinaface_correction/data/datasets/dummy"
     TRAIN_CSV = f"{dataset_root}/train.csv"
     VAL_CSV   = f"{dataset_root}/val.csv"
@@ -211,12 +223,15 @@ if __name__ == "__main__":
         val_csv=VAL_CSV,
         test_csv=TEST_CSV,
         output_dir=f"/home/mateusz-wawrzyniak/PycharmProjects/pan_retinaface_correction/data/classifiers/{model_name}",
-        input_size=64,        # must match P02.CNN_INPUT_SIZE used when saving crops
-        batch_size=128,
-        epochs=25,
-        lr=2e-4,
-        weight_decay=1e-4,
-        num_workers=6,
-        seed=42,
-        use_amp=True,
+        input_size=P02.CNN_INPUT_SIZE,
+        batch_size=P02.BATCH_SIZE,
+        num_workers=P02.NUM_WORKERS,
+        lr=P02.LEARNING_RATE,
+        weight_decay=P02.OPTIMIZER_WEIGHT_DECAY,
+        reduction_factor=P02.SCHEDULER_REDUCTION_FACTOR,
+        patience=P02.SCHEDULER_PATIENCE,
+        epochs=P02.EPOCHS,
+        dec_threshold=P02.PROB_THRESHOLD,
+        seed=P02.SEED,
+        use_amp=P02.USE_AMP,
     )

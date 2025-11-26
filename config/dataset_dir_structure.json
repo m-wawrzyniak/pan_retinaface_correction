@@ -1,0 +1,29 @@
+{
+  "extracted_frames": {
+    "_dir": "extracted_frames"
+  },
+
+  "manual_classification": {
+    "_dir": "manual_classification",
+    "deduplicated_frames.csv": "manual_classification/deduplicated_frames.csv",
+    "manual_class.csv": "manual_classification/manual_class.csv",
+    "manual_html": {
+      "_dir": "manual_classification/manual_html"
+    }
+  },
+
+  "model_classification": {
+    "_dir": "model_classification",
+    "model_class.csv": "model_classification/model_class.csv",
+    "model_html": {
+      "_dir": "model_classification/model_html"
+    }
+  },
+
+  "i_o": {
+    "_dir": "i_o",
+    "face_frames.csv": "i_o/face_frames.csv",
+    "augmented_face_frames.csv": "i_o/augmented_face_frames.csv"
+  }
+
+}

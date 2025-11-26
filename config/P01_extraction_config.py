@@ -1,3 +1,8 @@
+# PROJECT
+ROOT = "/home/mateusz-wawrzyniak/PycharmProjects/pan_retinaface_correction"
+PROJECT_STRUCT = f"{ROOT}/config/project_dir_structure.json"
+
+# EXTRACTION
 TIMESERIES_DATA = "/home/mateusz-wawrzyniak/Desktop/IP_PAN_Videos/Timeseries Data + Scene Video/"
 SECTIONS_CSV = "/home/mateusz-wawrzyniak/Desktop/IP_PAN_Videos/Sit&Face_FACE-MAPPER_Faces_Manipulative/sections.csv"
 FACE_MAPPER_DIR = "/home/mateusz-wawrzyniak/Desktop/IP_PAN_Videos/Sit&Face_FACE-MAPPER_Faces_Manipulative/"

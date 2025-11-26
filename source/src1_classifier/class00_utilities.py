@@ -2,13 +2,13 @@ import numpy as np
 import random
 import torch
 
-def set_seed(seed=42):
+def set_seed(seed):
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
 
-def compute_confusion(y_true, y_pred_logits, threshold=0.5):
+def compute_confusion(y_true, y_pred_logits, threshold):
     """y_true: tensor or array of 0/1, y_pred_logits: logits -> apply sigmoid"""
     probs = torch.sigmoid(torch.tensor(y_pred_logits))
     preds = (probs >= threshold).int()

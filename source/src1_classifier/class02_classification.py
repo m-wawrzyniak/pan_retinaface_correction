@@ -6,10 +6,11 @@ import torch
 from torchvision import transforms
 from PIL import Image
 
-import config.P01_extraction_config as P01
-from source.utilities import v00_html_visuals as v00
+from source.utilities import u00_html_visuals as v00
 from source.src1_classifier.Classifier import FaceVerifierCNN
 
+import config.P01_extraction_config as P01
+import config.P02_model_config as P02
 
 def load_model(model_path, input_size):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -28,7 +29,7 @@ def load_model(model_path, input_size):
     return model, device
 
 
-def classify_frame(model, device, img_path, transform):
+def classify_frame(model, device, img_path, transform, dec_threshold):
     img = Image.open(img_path).convert("RGB")
     img = transform(img).unsqueeze(0).to(device)
 
@@ -36,10 +37,10 @@ def classify_frame(model, device, img_path, transform):
         logits = model(img)
         prob = torch.sigmoid(logits).item()
 
-    return 1 if prob >= 0.5 else 0
+    return 1 if prob >= dec_threshold else 0
 
 
-def run_inference_on_recordings(model_path, rec_subset, recordings_info_json, input_size=64):
+def run_inference_on_recordings(model_path, rec_subset, recordings_info_json, input_size, dec_threshold):
 
     # Load model
     model, device = load_model(model_path, input_size)
@@ -82,7 +83,7 @@ def run_inference_on_recordings(model_path, rec_subset, recordings_info_json, in
         results = []
 
         for frame_path in tqdm(jpg_files, desc=f"{rec_id}", unit="frame"):
-            pred = classify_frame(model, device, frame_path, transform)
+            pred = classify_frame(model, device, frame_path, transform, dec_threshold=dec_threshold)
             results.append((frame_path.name, pred))
 
         out_csv = extraction_dir / "model_class.csv"
@@ -94,14 +95,14 @@ def run_inference_on_recordings(model_path, rec_subset, recordings_info_json, in
 
 
 if __name__ == "__main__":
-    """
+
     run_inference_on_recordings(
         model_path="/home/mateusz-wawrzyniak/PycharmProjects/pan_retinaface_correction/data/classifiers/class_v00/best_model.pth", # <-- update
-        input_size=64,                       # must match training
+        input_size=P02.CNN_INPUT_SIZE,
+        dec_threshold=P02.PROB_THRESHOLD,
         rec_subset=P01.REC_SUBSET,
         recordings_info_json = P01.RECORDINGS_INFO_PATH
     )
-    """
     with open(P01.RECORDINGS_INFO_PATH, "r") as f:
         recordings_info = json.load(f)
     for rec, rec_dict in recordings_info.items():

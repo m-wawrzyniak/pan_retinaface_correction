@@ -1,0 +1,17 @@
+{
+  "best_model.pth": "best_model.pth",
+  "training_log.csv": "training_log.csv",
+  "epoch_models": {
+    "_dir": "epoch_models"
+  },
+  "validation_metrics": {
+    "_dir": "validation_metrics"
+  },
+  "sets": {
+    "_dir": "sets",
+
+    "test.csv": "sets/test.csv",
+    "train.csv": "sets/train.csv",
+    "val.csv": "sets/val.csv"
+  }
+}
