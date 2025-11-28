@@ -1,20 +1,31 @@
 # PROJECT
-ROOT = "/home/mateusz-wawrzyniak/PycharmProjects/pan_retinaface_correction"
+ROOT_LOCAL = "/home/mateusz-wawrzyniak/PycharmProjects/pan_retinaface_correction"
+
+ROOT = "/media/mateusz-wawrzyniak/Extreme SSD/IP_PAN/retinaface_secondary_classification"
 PROJECT_STRUCT = f"{ROOT}/config/project_dir_structure.json"
 
-DATASET_NAME = "dataset_v00"
-CLASSIFIER_NAME = "class_v00"
+DATASET_NAME = "dataset_full_v00"
+CLASSIFIER_NAME = "class_full_v00"
 
 # EXTRACTION
+
+# locals
+"""
 TIMESERIES_DATA = "/home/mateusz-wawrzyniak/Desktop/IP_PAN_Videos/Timeseries Data + Scene Video/"
 SECTIONS_CSV = "/home/mateusz-wawrzyniak/Desktop/IP_PAN_Videos/Sit&Face_FACE-MAPPER_Faces_Manipulative/sections.csv"
 FACE_MAPPER_DIR = "/home/mateusz-wawrzyniak/Desktop/IP_PAN_Videos/Sit&Face_FACE-MAPPER_Faces_Manipulative/"
+"""
+# externals
+TIMESERIES_DATA = "/media/mateusz-wawrzyniak/Extreme SSD/IP_PAN/Timeseries Data + Scene Video/"
+SECTIONS_CSV = f"/media/mateusz-wawrzyniak/Extreme SSD/IP_PAN/Sit&Face_FACE-MAPPER_Faces_Manipulative/sections.csv"
+FACE_MAPPER_DIR = "/media/mateusz-wawrzyniak/Extreme SSD/IP_PAN/Sit&Face_FACE-MAPPER_Faces_Manipulative/"
 
-REC_SUBSET_SMALL = [
+
+REC_SUBSET = [
     "dcd95915-e5b0-4220-99b2-19c883d41d33"
 ]
 
-REC_SUBSET = [
+REC_SUBSET_MEDIUM = [
     "dcd95915-e5b0-4220-99b2-19c883d41d33",
     "a93ce8d5-e813-412f-b28e-6ed307f59e3b",
     "ac8f0ac1-8893-4a3f-a1aa-aee51ed653f4",

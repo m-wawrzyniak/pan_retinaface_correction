@@ -19,8 +19,8 @@ if __name__ == "__main__":
                                  json_path=paths_dict['data']['datasets'][P01.DATASET_NAME]['recordings_info.json'],
                                  extraction_root=paths_dict['data']['datasets'][P01.DATASET_NAME]['extracted_frames']['_dir'],
                                  model_csv_root=paths_dict['data']['datasets'][P01.DATASET_NAME]['model_classification']['_dir'],
-                                 manual_csv_root=paths_dict['data']['datasets'][P01.DATASET_NAME]['manual_classification']['_dir'])
-
+                                 manual_csv_root=paths_dict['data']['datasets'][P01.DATASET_NAME]['manual_classification']['_dir'],
+                                 rec_subset=P01.REC_SUBSET)
 
     print('\n01. Extracting face frames..')
     data01.extract_faces_for_all(P01.FACE_MAPPER_DIR,

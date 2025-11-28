@@ -22,7 +22,8 @@ def manual_classify_frames_from_csv(recordings_info, rec_subset):
         if rec_subset and rec_id not in rec_subset:
             continue
 
-        manual_csv = Path(rec_dict.get("manual_csv_dir", ""))
+        extracted_frames = Path(rec_dict["extraction_dir"])
+        manual_csv = Path(rec_dict["manual_csv_dir"])
         dedup_csv_path = manual_csv / "deduplicated_frames.csv"
         save_path = manual_csv / "manual_class.csv"
 
@@ -67,7 +68,7 @@ def manual_classify_frames_from_csv(recordings_info, rec_subset):
             if frame_name in classifications:
                 continue  # skip already classified
 
-            img_path = manual_csv / frame_name
+            img_path = extracted_frames / frame_name
             if not img_path.exists():
                 print(f"⚠️ Missing image file for {frame_name} — skipping")
                 continue

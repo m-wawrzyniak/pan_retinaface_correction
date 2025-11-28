@@ -12,7 +12,10 @@ from torchvision import transforms
 from source.src0_dataset_creation.ImageDataset import CSVImageDataset
 from source.src1_classifier.Classifier import FaceVerifierCNN
 
-import config.P02_model_config as P02
+from source.utilities import u01_dir_structure as u01
+
+from config import P01_extraction_config as P01
+from config import P02_model_config as P02
 
 def load_model(model_path, input_size):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -157,19 +160,25 @@ def final_validate(model, val_loader, device, prob_threshold=None):
 # ------------------------------------------------------------
 
 if __name__ == "__main__":
+    paths_dict = u01.build_absolute_paths(
+        root=P01.ROOT,
+        classifier_name=P01.CLASSIFIER_NAME,
+        dataset_name=P01.DATASET_NAME,
+        project_json_path=P01.PROJECT_STRUCT
+    )
     # Load model
-    model, device = load_model(model_path="/home/mateusz-wawrzyniak/PycharmProjects/pan_retinaface_correction/data/classifiers/class_v00/best_model.pth", input_size=P02.CNN_INPUT_SIZE)
+    model, device = load_model(model_path=paths_dict['data']['classifiers'][P01.CLASSIFIER_NAME]['best_model.pth'],
+                               input_size=P02.CNN_INPUT_SIZE)
     model.eval()
 
     # Load validation DataLoader
-    dataset_root = "/home/mateusz-wawrzyniak/PycharmProjects/pan_retinaface_correction/data/datasets/dummy"
-    VAL_CSV   = f"{dataset_root}/val.csv"
+    val_csv = paths_dict['data']['classifiers'][P01.CLASSIFIER_NAME]["sets"]["val.csv"]
     transform_eval = transforms.Compose([
         transforms.Resize((P02.CNN_INPUT_SIZE, P02.CNN_INPUT_SIZE)),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485,0.456,0.406], std=[0.229,0.224,0.225])
     ])
-    val_df = pd.read_csv(VAL_CSV)
+    val_df = pd.read_csv(val_csv)
     val_ds = CSVImageDataset(val_df, transform=transform_eval)
     val_loader = DataLoader(val_ds, batch_size=P02.BATCH_SIZE, shuffle=False,
                             num_workers=P02.NUM_WORKERS, pin_memory=True)

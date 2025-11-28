@@ -18,11 +18,11 @@ if __name__ == "__main__":
 
     with open(paths_dict['data']['datasets'][P01.DATASET_NAME]['recordings_info.json'], "r") as f:
         recordings_info = json.load(f)
-    """
+
     data03.manual_classify_frames_from_csv(
         recordings_info=recordings_info,
         rec_subset=P01.REC_SUBSET
-    )"""
+    )
 
     for rec, rec_dict in recordings_info.items():
         if rec_dict["section_start_time_ns"] != None:
