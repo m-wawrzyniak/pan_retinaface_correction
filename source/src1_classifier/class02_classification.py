@@ -8,9 +8,10 @@ from PIL import Image
 
 from source.utilities import u00_html_visuals as v00
 from source.src1_classifier.Classifier import FaceVerifierCNN
+from source.utilities import u01_dir_structure as u01
 
-import config.P01_extraction_config as P01
-import config.P02_model_config as P02
+from config import P01_extraction_config as P01
+from config import P02_model_config as P02
 
 def load_model(model_path, input_size):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -86,7 +87,8 @@ def run_inference_on_recordings(model_path, rec_subset, recordings_info_json, in
             pred = classify_frame(model, device, frame_path, transform, dec_threshold=dec_threshold)
             results.append((frame_path.name, pred))
 
-        out_csv = extraction_dir / "model_class.csv"
+        model_csv_dir = Path(recordings_info[rec_id]["model_csv_dir"])
+        out_csv = model_csv_dir / "model_class.csv"
         df = pd.DataFrame(results, columns=["frame", "is_face"])
         df.to_csv(out_csv, index=False)
 
@@ -95,19 +97,26 @@ def run_inference_on_recordings(model_path, rec_subset, recordings_info_json, in
 
 
 if __name__ == "__main__":
+    paths_dict = u01.build_absolute_paths(
+        root=P01.ROOT,
+        classifier_name=P01.CLASSIFIER_NAME,
+        dataset_name=P01.DATASET_NAME,
+        project_json_path=P01.PROJECT_STRUCT
+    )
 
     run_inference_on_recordings(
-        model_path="/home/mateusz-wawrzyniak/PycharmProjects/pan_retinaface_correction/data/classifiers/class_v00/best_model.pth", # <-- update
+        model_path=paths_dict['data']['classifiers'][P01.CLASSIFIER_NAME]['best_model.pth'],
         input_size=P02.CNN_INPUT_SIZE,
         dec_threshold=P02.PROB_THRESHOLD,
         rec_subset=P01.REC_SUBSET,
-        recordings_info_json = P01.RECORDINGS_INFO_PATH
+        recordings_info_json = paths_dict['data']['datasets'][P01.DATASET_NAME]['recordings_info.json']
     )
-    with open(P01.RECORDINGS_INFO_PATH, "r") as f:
+    with open(paths_dict['data']['datasets'][P01.DATASET_NAME]['recordings_info.json'], "r") as f:
         recordings_info = json.load(f)
     for rec, rec_dict in recordings_info.items():
         if rec_dict["section_start_time_ns"] != None:
             v00.export_html_paginated(
                 name='model',
-                csv_path= Path(rec_dict['extraction_dir']) / 'model_class.csv'
+                csv_path= Path(rec_dict['model_csv_dir']) / 'model_class.csv',
+                extracted_path = Path(rec_dict['extraction_dir'])
             )

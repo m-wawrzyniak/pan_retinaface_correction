@@ -211,7 +211,3 @@ def extract_faces_for_all(FACE_MAPPER_DIR: str, recordings_info_path: str, subse
         extract_frames(rec_data, str(mapper_detections))
 
     print("\n✅ Extraction complete!")
-
-
-if __name__ == "__main__":
-    extract_faces_for_all(P01.FACE_MAPPER_DIR, P01.RECORDINGS_INFO_PATH, subset_ids=P01.REC_SUBSET)

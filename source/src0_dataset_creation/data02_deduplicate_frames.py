@@ -25,7 +25,8 @@ def deduplicate_face_frames_csv(recordings_info, rec_subset, threshold):
 
         extraction_dir = rec_dict["extraction_dir"]
         face_csv_path = Path(extraction_dir) / "face_frames.csv"
-        dedup_csv_path = Path(extraction_dir) / "deduplicated_frames.csv"
+        manual_dir = rec_dict["manual_csv_dir"]
+        dedup_csv_path = Path(manual_dir) / "deduplicated_frames.csv"
 
         df = pd.read_csv(face_csv_path)
         if df.empty:

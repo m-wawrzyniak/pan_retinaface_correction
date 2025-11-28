@@ -3,7 +3,7 @@ import pandas as pd
 from pathlib import Path
 import math
 
-def export_html_paginated(name, csv_path, page_size=100):
+def export_html_paginated(name, csv_path, extracted_path, page_size=100):
     """
     Creates paginated HTML visualization for is_face / non_face images.
 
@@ -26,7 +26,8 @@ def export_html_paginated(name, csv_path, page_size=100):
     def write_page(df_subset, label, page_idx, total_pages):
         """Write a single paginated HTML file."""
         file_name = f"{name}_{label.lower()}_page_{page_idx+1}.html"
-        out_path = base_dir / file_name
+        os.makedirs(base_dir / "result_html", exist_ok=True)
+        out_path = base_dir / "result_html" /file_name
 
         start = page_idx * page_size
         end = min(start + page_size, len(df_subset))
@@ -57,13 +58,13 @@ def export_html_paginated(name, csv_path, page_size=100):
 """
 
         for fname in subset["frame"]:
-            img_path = base_dir / fname
+            img_path = extracted_path / fname
             if not img_path.exists():
                 continue
 
             html += (
                 f"<div style='margin:10px;'>"
-                f"<img loading='lazy' src='{fname}' "
+                f"<img loading='lazy' src='{img_path}' "
                 f"style='max-width:320px;height:auto;display:block;'>"
                 f"<p style='text-align:center;'>{fname}</p>"
                 f"</div>"
@@ -92,7 +93,7 @@ def export_html_paginated(name, csv_path, page_size=100):
     nonface_pages = paginated_export(nonface_df, "NonFaces")
 
     # Create index.html as a hub
-    index_path = base_dir / f"{name}_index.html"
+    index_path = base_dir / "result_html" / f"{name}_index.html"
     html_index = f"""
 <!DOCTYPE html>
 <html>

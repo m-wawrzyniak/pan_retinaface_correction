@@ -137,13 +137,11 @@ def build_absolute_paths(root, classifier_name, dataset_name, project_json_path)
                     abs_dir = os.path.join(base_path, val["_dir"])
                     resolved[key] = {"_dir": abs_dir}
 
-                    # Resolve nested items under same base
                     nested = {k: v for k, v in val.items() if k != "_dir"}
                     for nk, nv in resolve(base_path, nested).items():
                         resolved[key][nk] = nv
 
                 else:
-                    # Nested structure without its own base
                     resolved[key] = resolve(base_path, val)
 
             # File
@@ -156,36 +154,54 @@ def build_absolute_paths(root, classifier_name, dataset_name, project_json_path)
         return resolved
 
     # ------------------------------------------------------------------
-    # Build final master dictionary
+    # Resolve classifier + dataset
+    # ------------------------------------------------------------------
+    classifier_tree = resolve(classifiers_base, classifier_template)
+    dataset_tree = resolve(datasets_base, dataset_template)
+
+    # ------------------------------------------------------------------
+    # Add missing absolute directory paths
     # ------------------------------------------------------------------
     result = {
         "ROOT": root,
         "config": {
+            "_dir": os.path.join(root, config["_dir"]),
             "project_dir_structure": os.path.abspath(project_json_path),
             "dataset_structure": os.path.abspath(dataset_template_path),
             "classifier_structure": os.path.abspath(classifier_template_path)
         },
         "data": {
-            "CLASSIFIER": resolve(classifiers_base, classifier_template),
-            "DATASET": resolve(datasets_base, dataset_template)
+            "_dir": os.path.join(root, data_spec["_dir"]),
+            "classifiers": {
+                "_dir": os.path.join(root, data_spec["classifiers"]["_dir"]),
+                classifier_name: {
+                    "_dir": classifiers_base,
+                    **classifier_tree
+                }
+            },
+            "datasets": {
+                "_dir": os.path.join(root, data_spec["datasets"]["_dir"]),
+                dataset_name: {
+                    "_dir": datasets_base,
+                    **dataset_tree
+                }
+            }
         }
     }
 
     return result
 
 if __name__ == "__main__":
-    """
     create_project_skeleton(
         root=P01.ROOT,
-        classifier_name="class_v00",
-        dataset_name="dataset_v00",
+        classifier_name=P01.CLASSIFIER_NAME,
+        dataset_name=P01.DATASET_NAME,
         project_json_path=P01.PROJECT_STRUCT
     )
-    """
     paths_dict = build_absolute_paths(
         root=P01.ROOT,
-        classifier_name="class_v00",
-        dataset_name="dataset_v00",
+        classifier_name=P01.CLASSIFIER_NAME,
+        dataset_name=P01.DATASET_NAME,
         project_json_path=P01.PROJECT_STRUCT
     )
     pprint(paths_dict)

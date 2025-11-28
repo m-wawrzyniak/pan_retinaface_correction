@@ -22,10 +22,9 @@ def manual_classify_frames_from_csv(recordings_info, rec_subset):
         if rec_subset and rec_id not in rec_subset:
             continue
 
-        recording_dir = Path(rec_dict.get("recording_root", ""))
-        extraction_dir = Path(rec_dict.get("extraction_dir", ""))
-        dedup_csv_path = extraction_dir / "deduplicated_frames.csv"
-        save_path = extraction_dir / "manual_class.csv"
+        manual_csv = Path(rec_dict.get("manual_csv_dir", ""))
+        dedup_csv_path = manual_csv / "deduplicated_frames.csv"
+        save_path = manual_csv / "manual_class.csv"
 
         if not dedup_csv_path.exists():
             print(f"⚠️ Skipping {rec_id} — no deduplicated_frames.csv found.")
@@ -68,7 +67,7 @@ def manual_classify_frames_from_csv(recordings_info, rec_subset):
             if frame_name in classifications:
                 continue  # skip already classified
 
-            img_path = extraction_dir / frame_name
+            img_path = manual_csv / frame_name
             if not img_path.exists():
                 print(f"⚠️ Missing image file for {frame_name} — skipping")
                 continue
@@ -103,14 +102,3 @@ def manual_classify_frames_from_csv(recordings_info, rec_subset):
 
         cv2.destroyAllWindows()
         print(f"✅ Saved classifications for {rec_id} at {save_path}\n")
-
-if __name__ == "__main__":
-    from config import P01_extraction_config as P01
-
-    with open(P01.RECORDINGS_INFO_PATH, "r") as f:
-        recordings_info = json.load(f)
-
-    manual_classify_frames_from_csv(
-        recordings_info=recordings_info,
-        rec_subset=P01.REC_SUBSET
-    )

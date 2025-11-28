@@ -9,7 +9,9 @@ from torchvision import transforms
 from source.src0_dataset_creation.ImageDataset import CSVImageDataset
 from source.src1_classifier.Classifier import FaceVerifierCNN
 from source.src1_classifier import class00_utilities as class00
+from source.utilities import u01_dir_structure as u01
 
+from config import P01_extraction_config as P01
 from config import P02_model_config as P02
 
 
@@ -79,7 +81,7 @@ def train_model(
         epochs,
         dec_threshold,
         seed,
-        output_dir="output_model",
+        output_dir,
         use_amp=True
     ):
     class00.set_seed(seed)
@@ -212,17 +214,23 @@ def train_model(
 
 
 if __name__ == "__main__":
-    dataset_root = "/home/mateusz-wawrzyniak/PycharmProjects/pan_retinaface_correction/data/datasets/dummy"
-    TRAIN_CSV = f"{dataset_root}/train.csv"
-    VAL_CSV   = f"{dataset_root}/val.csv"
-    TEST_CSV  = f"{dataset_root}/test.csv"
+    paths_dict = u01.build_absolute_paths(
+        root=P01.ROOT,
+        classifier_name=P01.CLASSIFIER_NAME,
+        dataset_name=P01.DATASET_NAME,
+        project_json_path=P01.PROJECT_STRUCT
+    )
 
-    model_name = "class_v00"
+    dataset_root = paths_dict['data']['classifiers'][P01.CLASSIFIER_NAME]['sets']
+    TRAIN_CSV = dataset_root['train.csv']
+    VAL_CSV   = dataset_root['val.csv']
+    TEST_CSV  = dataset_root['test.csv']
+
     model, hist_df, test_conf = train_model(
         train_csv=TRAIN_CSV,
         val_csv=VAL_CSV,
         test_csv=TEST_CSV,
-        output_dir=f"/home/mateusz-wawrzyniak/PycharmProjects/pan_retinaface_correction/data/classifiers/{model_name}",
+        output_dir=paths_dict['data']['classifiers'][P01.CLASSIFIER_NAME]['_dir'],
         input_size=P02.CNN_INPUT_SIZE,
         batch_size=P02.BATCH_SIZE,
         num_workers=P02.NUM_WORKERS,
@@ -235,3 +243,4 @@ if __name__ == "__main__":
         seed=P02.SEED,
         use_amp=P02.USE_AMP,
     )
+

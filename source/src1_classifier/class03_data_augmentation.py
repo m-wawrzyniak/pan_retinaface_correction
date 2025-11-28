@@ -2,6 +2,7 @@ import os
 import json
 import pandas as pd
 from pathlib import Path
+from source.utilities import u01_dir_structure as u01
 
 import config.P01_extraction_config as P01
 
@@ -15,10 +16,9 @@ def prune_face_frames(rec_subset, recordings_info_path):
             continue
 
         rec_dict = recordings_info[rec_id]
-        extraction_dir = Path(rec_dict["extraction_dir"])
-        face_csv_path = extraction_dir / "face_frames.csv"
-        model_csv_path = extraction_dir / "model_class.csv"
-        augmented_csv_path = extraction_dir / "augmented_face_frames.csv"
+        face_csv_path = Path(rec_dict["extraction_dir"]) / "face_frames.csv"
+        model_csv_path = Path(rec_dict["model_csv_dir"]) / "model_class.csv"
+        augmented_csv_path = Path(rec_dict["model_csv_dir"]) / "augmented_face_frames.csv"
 
         if not face_csv_path.exists():
             print(f"⚠️ face_frames.csv missing for {rec_id}")
@@ -58,8 +58,7 @@ def aggregate_augmented_face_detections(rec_subset, recordings_info_path, output
             continue
 
         rec_dict = recordings_info[rec_id]
-        extraction_dir = Path(rec_dict["extraction_dir"])
-        augmented_csv_path = extraction_dir / "augmented_face_frames.csv"
+        augmented_csv_path = Path(rec_dict["model_csv_dir"]) / "augmented_face_frames.csv"
 
         if not augmented_csv_path.exists():
             print(f"⚠️ {augmented_csv_path} missing → skipping {rec_id}")
@@ -80,10 +79,17 @@ def aggregate_augmented_face_detections(rec_subset, recordings_info_path, output
     print(f"✅ Aggregated CSV saved at {output_csv} ({len(aggregated_df)} frames)")
 
 if __name__ == "__main__":
+    paths_dict = u01.build_absolute_paths(
+        root=P01.ROOT,
+        classifier_name=P01.CLASSIFIER_NAME,
+        dataset_name=P01.DATASET_NAME,
+        project_json_path=P01.PROJECT_STRUCT
+    )
+
     prune_face_frames(
         rec_subset=P01.REC_SUBSET,
-        recordings_info_path=P01.RECORDINGS_INFO_PATH)
+        recordings_info_path=paths_dict['data']['datasets'][P01.DATASET_NAME]['recordings_info.json'])
     aggregate_augmented_face_detections(
         rec_subset=P01.REC_SUBSET,
-        recordings_info_path=P01.RECORDINGS_INFO_PATH,
+        recordings_info_path=paths_dict['data']['datasets'][P01.DATASET_NAME]['recordings_info.json'],
         output_dir=P01.TIMESERIES_DATA)
