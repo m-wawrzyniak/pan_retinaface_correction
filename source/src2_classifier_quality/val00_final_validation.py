@@ -8,6 +8,7 @@ import numpy as np
 from torch.utils.data import DataLoader
 import pandas as pd
 from torchvision import transforms
+from pathlib import Path
 
 from source.src0_dataset_creation.ImageDataset import CSVImageDataset
 from source.src1_classifier.Classifier import FaceVerifierCNN
@@ -34,7 +35,7 @@ def load_model(model_path, input_size):
     return model, device
 
 
-def final_validate(model, val_loader, device, prob_threshold=None):
+def final_validate(model, val_loader, device, save_dir, prob_threshold=None):
     """
     Validate a binary classifier (face / non-face) with full metrics and plots.
 
@@ -109,7 +110,8 @@ def final_validate(model, val_loader, device, prob_threshold=None):
     plt.title("ROC Curve")
     plt.grid(True)
     plt.legend()
-    plt.show()
+    roc_path = Path(save_dir) / 'roc_curve.jpg'
+    plt.savefig(roc_path, dpi=200)
 
     # Precision-Recall Curve
     plt.figure(figsize=(6,5))
@@ -118,7 +120,8 @@ def final_validate(model, val_loader, device, prob_threshold=None):
     plt.ylabel("Precision")
     plt.title("Precision-Recall Curve")
     plt.grid(True)
-    plt.show()
+    prec_rec_path = Path(save_dir) / 'prec_rec.jpg'
+    plt.savefig(prec_rec_path, dpi=200)
 
     # Confusion Matrix Heatmap
     plt.figure(figsize=(5,4))
@@ -130,7 +133,8 @@ def final_validate(model, val_loader, device, prob_threshold=None):
             plt.text(j, i, cm[i, j], ha="center", va="center", color="black")
     plt.xlabel("Predicted")
     plt.ylabel("True")
-    plt.show()
+    conf_path = Path(save_dir) / 'conf_mat.jpg'
+    plt.savefig(conf_path, dpi=200)
 
     # Logit distributions
     plt.figure(figsize=(6,5))
@@ -142,7 +146,8 @@ def final_validate(model, val_loader, device, prob_threshold=None):
     plt.title("Logit Score Distribution")
     plt.legend()
     plt.grid(True)
-    plt.show()
+    logit_path = Path(save_dir) / 'logit_dist.jpg'
+    plt.savefig(logit_path, dpi=200)
 
     return {
         "accuracy": accuracy,
@@ -172,7 +177,7 @@ if __name__ == "__main__":
     model.eval()
 
     # Load validation DataLoader
-    val_csv = paths_dict['data']['classifiers'][P01.CLASSIFIER_NAME]["sets"]["val.csv"]
+    val_csv = paths_dict['data']['classifiers'][P01.CLASSIFIER_NAME]['sets']['val.csv']
     transform_eval = transforms.Compose([
         transforms.Resize((P02.CNN_INPUT_SIZE, P02.CNN_INPUT_SIZE)),
         transforms.ToTensor(),
@@ -183,4 +188,6 @@ if __name__ == "__main__":
     val_loader = DataLoader(val_ds, batch_size=P02.BATCH_SIZE, shuffle=False,
                             num_workers=P02.NUM_WORKERS, pin_memory=True)
 
-    results = final_validate(model, val_loader, device)
+    val_dir = paths_dict['data']['classifiers'][P01.CLASSIFIER_NAME]['validation_metrics']['_dir']
+    results = final_validate(model, val_loader, device,
+                             save_dir=val_dir)

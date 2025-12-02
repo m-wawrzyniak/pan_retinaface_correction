@@ -60,13 +60,3 @@ def deduplicate_face_frames_csv(recordings_info, rec_subset, threshold):
         dedup_df = pd.concat(dedup_rows, ignore_index=True)
         dedup_df.to_csv(dedup_csv_path, index=False)
         print(f"✅ Deduplicated {len(df)} → {len(dedup_df)} frames for {rec_id}")
-
-
-if __name__ == "__main__":
-    with open(P01.RECORDINGS_INFO_PATH, "r") as f:
-        recordings_info = json.load(f)
-    deduplicate_face_frames_csv(
-        recordings_info=recordings_info,
-        rec_subset=P01.REC_SUBSET,
-        threshold=P01.DEDUP_THRESHOLD
-    )

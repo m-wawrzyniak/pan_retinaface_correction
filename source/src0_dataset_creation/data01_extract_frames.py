@@ -86,11 +86,6 @@ def extract_frames(rec_dict: dict, mapper_detections: str):
             counter += 1
         df.at[i, "suffix"] = counter
 
-    # --- Save filtered detections with suffix ---
-    csv_out_path = extract_dir / "face_frames.csv"
-    df.to_csv(csv_out_path, index=False)
-    print(f"✅ Filtered detections saved at {csv_out_path}")
-
     # --- Open video ---
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
@@ -165,11 +160,16 @@ def extract_frames(rec_dict: dict, mapper_detections: str):
         # --- Save frame with suffix ---
         filename = extract_dir / f"{ts}_{suffix}.jpg"
         cv2.imwrite(str(filename), squared)
+        df.at[i, "frame_path"] = str(filename)
 
         if (i + 1) % 150 == 0 or (i + 1) == total:
             percent = (i + 1) / total * 100
             print(f"Progress: {i + 1}/{total} ({percent:.1f}%)")
 
+    # --- Save filtered detections with suffix ---
+    csv_out_path = extract_dir / "face_frames.csv"
+    df.to_csv(csv_out_path, index=False)
+    print(f"✅ Filtered detections saved at {csv_out_path}")
     cap.release()
     print(f"✅ Done extracting {total} faces for {recording_id}")
 

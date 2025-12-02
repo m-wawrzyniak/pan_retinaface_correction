@@ -1,11 +1,14 @@
 # PROJECT
+from sklearn.utils import TargetTags
+from torchgen.utils import Target
+
 ROOT_LOCAL = "/home/mateusz-wawrzyniak/PycharmProjects/pan_retinaface_correction"
 
 ROOT = "/media/mateusz-wawrzyniak/Extreme SSD/IP_PAN/retinaface_secondary_classification"
 PROJECT_STRUCT = f"{ROOT}/config/project_dir_structure.json"
 
-DATASET_NAME = "dataset_full_v00"
-CLASSIFIER_NAME = "class_full_v00"
+DATASET_NAME = "dataset_proper_sampling"
+CLASSIFIER_NAME = "class_proper_sampling"
 
 # EXTRACTION
 
@@ -20,8 +23,11 @@ TIMESERIES_DATA = "/media/mateusz-wawrzyniak/Extreme SSD/IP_PAN/Timeseries Data 
 SECTIONS_CSV = f"/media/mateusz-wawrzyniak/Extreme SSD/IP_PAN/Sit&Face_FACE-MAPPER_Faces_Manipulative/sections.csv"
 FACE_MAPPER_DIR = "/media/mateusz-wawrzyniak/Extreme SSD/IP_PAN/Sit&Face_FACE-MAPPER_Faces_Manipulative/"
 
-
 REC_SUBSET = [
+    "dcd95915-e5b0-4220-99b2-19c883d41d33"
+]
+
+REC_SUBSET_SMALL = [
     "dcd95915-e5b0-4220-99b2-19c883d41d33"
 ]
 
@@ -39,4 +45,9 @@ REC_SUBSET_MEDIUM = [
     "b9572652-7a81-478d-9474-ce3fda17b342",
     "76eb2fea-912c-4557-97a9-560c14559bfe"
 ]
+
+# Extraction parameters
 DEDUP_THRESHOLD = 0.2
+N_CLUSTERS = 12
+MIN_PER_CLUSTER = 2
+TARGET_FRAMES_PER_REC = 120
