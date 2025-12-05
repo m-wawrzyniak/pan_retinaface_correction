@@ -5,7 +5,8 @@
     "_dir": "epoch_models"
   },
   "validation_metrics": {
-    "_dir": "validation_metrics"
+    "_dir": "validation_metrics",
+    "comparison_class.csv": "validation_metrics/comparison_class.csv"
   },
   "sets": {
     "_dir": "sets",

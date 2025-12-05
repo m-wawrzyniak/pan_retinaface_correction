@@ -239,7 +239,7 @@ if __name__ == "__main__":
         reduction_factor=P02.SCHEDULER_REDUCTION_FACTOR,
         patience=P02.SCHEDULER_PATIENCE,
         epochs=P02.EPOCHS,
-        dec_threshold=P02.PROB_THRESHOLD,
+        dec_threshold=P02.TRAIN_PROB_THRESHOLD,
         seed=P02.SEED,
         use_amp=P02.USE_AMP,
     )

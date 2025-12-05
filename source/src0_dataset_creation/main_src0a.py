@@ -22,23 +22,17 @@ if __name__ == "__main__":
                                  model_csv_root=paths_dict['data']['datasets'][P01.DATASET_NAME]['model_classification']['_dir'],
                                  manual_csv_root=paths_dict['data']['datasets'][P01.DATASET_NAME]['manual_classification']['_dir'],
                                  rec_subset=P01.REC_SUBSET)
-
+    """
     print('\n01. Extracting face frames..')
     data01.extract_faces_for_all(P01.FACE_MAPPER_DIR,
                                  recordings_info_path=paths_dict['data']['datasets'][P01.DATASET_NAME]['recordings_info.json'],
                                  subset_ids=P01.REC_SUBSET)
-
+    """
 
     print('\n02. Deduplicating face frames..')
     with open(paths_dict['data']['datasets'][P01.DATASET_NAME]['recordings_info.json'], "r") as f:
         recordings_info = json.load(f)
-    """
-    data02.deduplicate_face_frames_csv(
-        recordings_info=recordings_info,
-        rec_subset=P01.REC_SUBSET,
-        threshold=P01.DEDUP_THRESHOLD
-    )
-    """
+
     exp_data02.sample_face_frames_csv(
         recordings_info=recordings_info,
         rec_subset=P01.REC_SUBSET,

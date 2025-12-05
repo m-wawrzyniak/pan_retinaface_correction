@@ -37,8 +37,10 @@ def prune_face_frames(rec_subset, recordings_info_path):
         face_frames_set = set(model_df[model_df["is_face"] == 1]["frame"])
         filtered_df = face_df[face_df["frame_name"].isin(face_frames_set)].copy()
 
-        # Drop helper column and save
-        filtered_df.drop(columns=["frame_name"], inplace=True)
+        for col in ["frame_name", "frame_path"]:
+            if col in filtered_df.columns:
+                filtered_df.drop(columns=[col], inplace=True)
+
         filtered_df.to_csv(augmented_csv_path, index=False)
         print(f"✅ {rec_id} → augmented_face_frames.csv ({len(filtered_df)} frames)")
 
@@ -92,4 +94,4 @@ if __name__ == "__main__":
     aggregate_augmented_face_detections(
         rec_subset=P01.REC_SUBSET,
         recordings_info_path=paths_dict['data']['datasets'][P01.DATASET_NAME]['recordings_info.json'],
-        output_dir=P01.TIMESERIES_DATA)
+        output_dir=P01.FACE_MAPPER_DIR)

@@ -51,7 +51,7 @@ def final_validate(model, val_loader, device, save_dir, prob_threshold=None):
         Defaults to P02.PROB_THRESHOLD
     """
     if prob_threshold is None:
-        prob_threshold = P02.PROB_THRESHOLD
+        prob_threshold = P02.OPT_PROB_THRESHOLD
 
     model.eval()
     all_logits = []

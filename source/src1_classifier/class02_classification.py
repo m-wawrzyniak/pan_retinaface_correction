@@ -107,7 +107,7 @@ if __name__ == "__main__":
     run_inference_on_recordings(
         model_path=paths_dict['data']['classifiers'][P01.CLASSIFIER_NAME]['best_model.pth'],
         input_size=P02.CNN_INPUT_SIZE,
-        dec_threshold=P02.PROB_THRESHOLD,
+        dec_threshold=P02.OPT_PROB_THRESHOLD,
         rec_subset=P01.REC_SUBSET,
         recordings_info_json = paths_dict['data']['datasets'][P01.DATASET_NAME]['recordings_info.json']
     )

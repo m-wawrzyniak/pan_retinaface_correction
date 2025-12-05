@@ -22,7 +22,8 @@ def manual_classify_frames_from_csv(recordings_info, rec_subset):
     rec_subset : list[str], optional
         List of recording IDs to process. If None, all recordings are processed.
     """
-    for rec_id, rec_dict in recordings_info.items():
+    rec_len = len(recordings_info)
+    for i, (rec_id, rec_dict) in enumerate(recordings_info.items()):
         if rec_subset and rec_id not in rec_subset:
             continue
 
@@ -35,7 +36,7 @@ def manual_classify_frames_from_csv(recordings_info, rec_subset):
             print(f"⚠️ Skipping {rec_id} — no sampled_frames.csv found.")
             continue
 
-        print(f"\n🧠 Starting manual classification for {rec_id} ({rec_dict.get('rec_name', '')})")
+        print(f"\n🧠 Starting manual classification ({i+1}/{rec_len}) for {rec_id} ({rec_dict.get('rec_name', '')})")
 
         # --- Load existing progress ---
         classifications = {}
